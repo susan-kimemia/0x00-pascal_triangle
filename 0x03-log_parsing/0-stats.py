@@ -1,39 +1,51 @@
 #!/usr/bin/python3
-"""
-Log parsing
-"""
-
+'''Log parsing mandatory
+'''
 import sys
 
-if __name__ == '__main__':
 
-    filesize, count = 0, 0
-    codes = ["200", "301", "400", "401", "403", "404", "405", "500"]
-    stats = {k: 0 for k in codes}
+def print_message(dict_sc, total_file_size):
+    """
+    Log parsing:
+    script that reads stdin line by line and computes metrics
+    """
 
-    def print_stats(stats: dict, file_size: int) -> None:
-        print("File size: {:d}".format(filesize))
-        for k, v in sorted(stats.items()):
-            if v:
-                print("{}: {}".format(k, v))
+    print("File size: {}".format(total_file_size))
+    for key, val in sorted(dict_status.items()):
+        if val != 0:
+            print("{}: {}".format(key, val))
 
-    try:
-        for line in sys.stdin:
-            count += 1
-            data = line.split()
-            try:
-                status_code = data[-2]
-                if status_code in stats:
-                    stats[status_code] += 1
-            except BaseException:
-                pass
-            try:
-                filesize += int(data[-1])
-            except BaseException:
-                pass
-            if count % 10 == 0:
-                print_stats(stats, filesize)
-        print_stats(stats, filesize)
-    except KeyboardInterrupt:
-        print_stats(stats, filesize)
-        raise
+
+total_file_size = 0
+code = 0
+counter = 0
+dict_status = {"200": 0,
+               "301": 0,
+               "400": 0,
+               "401": 0,
+               "403": 0,
+               "404": 0,
+               "405": 0,
+               "500": 0}
+
+try:
+    for line in sys.stdin:
+        parsed_line = line.split()  # ✄ trimming
+        parsed_line = parsed_line[::-1]  # inverting
+
+        if len(parsed_line) > 2:
+            counter += 1
+
+            if counter <= 10:
+                total_file_size += int(parsed_line[0])  # file size
+                code = parsed_line[1]  # status code
+
+                if (code in dict_status.keys()):
+                    dict_status[code] += 1
+
+            if (counter == 10):
+                print_message(dict_status, total_file_size)
+                counter = 0
+
+finally:
+    print_message(dict_status, total_file_size)
